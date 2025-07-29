@@ -48,6 +48,11 @@ let create_bloom n p =
     hash_seeds = generate_seeds k_hashes;
   }
 
+(* Fonction de hachage pour le filtre de Bloom *)
+let hash_i seed x size =
+  let base = Hashtbl.hash (seed, x) in
+  (abs base) mod size
+
 
 let () =
   let bloom = create_bloom 10000 0.01 in

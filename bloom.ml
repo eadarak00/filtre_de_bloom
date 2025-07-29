@@ -73,6 +73,20 @@ let check bloom x =
 
 let () =
   let bloom = create_bloom 10000 0.01 in
-  set bloom 42;
-  Printf.printf "Bit 42 : %b\n" (get bloom 42);  (* devrait être true *)
-  Printf.printf "Bit 10 : %b\n" (get bloom 10)   (* devrait être false *)
+
+  (* Ajouter des mots *)
+  let words = ["chat"; "chien"; "oiseau"; "tigre"; "lion"] in
+  List.iter (add bloom) words;
+
+  (* Tester des mots présents *)
+  Printf.printf "\n--- Tests d'inclusion ---\n";
+  List.iter (fun w ->
+    Printf.printf "Est-ce que \"%s\" est reconnu ? %b\n" w (check bloom w)
+  ) words;
+
+  (* Tester des mots absents *)
+  let absent = ["dragon"; "requin"; "poule"] in
+  Printf.printf "\n--- Tests de faux positifs ---\n";
+  List.iter (fun w ->
+    Printf.printf "Est-ce que \"%s\" est reconnu ? %b\n" w (check bloom w)
+  ) absent

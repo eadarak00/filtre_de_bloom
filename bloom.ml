@@ -1,3 +1,11 @@
+(* Type pour représenter le filtre de Bloom *)
+type bloom = {
+  bits: int32 array;        (* Tableau d'entiers 32 bits pour représenter les bits *)
+  size: int;                (* Taille totale en bits *)
+  k: int;                   (* Nombre de fonctions de hachage *)
+  hash_seeds: int array;    (* Graines pour générer différentes fonctions de hachage *)
+}
+
 (* Calcul du nombre de bits m *)
 let m n p =
   let n = float_of_int n in

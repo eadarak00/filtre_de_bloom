@@ -111,6 +111,14 @@ let binary_search arr x =
   in
   aux 0 (Array.length arr - 1)
 
+(* Mesure le temps d'exécution d'une fonction *)
+let measure f x =
+  let start = Sys.time () in
+  let result = f x in
+  let stop = Sys.time () in
+  (result, stop -. start)
+
+
 
 (* Programme de test principal *)
 let () =

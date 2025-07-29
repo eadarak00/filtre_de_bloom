@@ -98,6 +98,19 @@ let read_words filename =
 let add_all bloom words =
   List.iter (add bloom) words
 
+(* Recherche dichotomique dans un tableau trié *)
+let binary_search arr x =
+  let rec aux low high =
+    if low > high then false
+    else
+      let mid = (low + high) / 2 in
+      let cmp = compare x arr.(mid) in
+      if cmp = 0 then true
+      else if cmp < 0 then aux low (mid - 1)
+      else aux (mid + 1) high
+  in
+  aux 0 (Array.length arr - 1)
+
 
 (* Programme de test principal *)
 let () =

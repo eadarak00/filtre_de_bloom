@@ -32,6 +32,9 @@ let set bloom i =
   let mask = Int32.shift_left Int32.one offset in
   bloom.bits.(index) <- Int32.logor bloom.bits.(index) mask
 
+(* Génère un tableau de graines pour les fonctions de hachage. *)
+let generate_seeds k =
+  Array.init k (fun i -> 17 + i * 23)
 
 (* Fonction de test *)
 let () =

@@ -71,22 +71,36 @@ let check bloom x =
   loop 0
 
 
+(* Programme de test principal *)
 let () =
+  (* Crée un filtre pour 10,000 éléments avec 1% de faux positifs *)
   let bloom = create_bloom 10000 0.01 in
+  
+  (* Ajoute quelques animaux *)
+  let animals = ["chat"; "chien"; "oiseau"; "tigre"; "lion"] in
+  List.iter (add bloom) animals;
 
-  (* Ajouter des mots *)
-  let words = ["chat"; "chien"; "oiseau"; "tigre"; "lion"] in
-  List.iter (add bloom) words;
+  (* Teste les animaux connus *)
+  Printf.printf "\n=== Tests des éléments ajoutés ===\n";
+  List.iter (fun animal ->
+    let present = check bloom animal in
+    Printf.printf "\"%s\" dans le filtre? %b (devrait être vrai)\n" animal present;
+    assert present (* Vérifie qu'ils sont tous reconnus *)
+  ) animals;
 
-  (* Tester des mots présents *)
-  Printf.printf "\n--- Tests d'inclusion ---\n";
-  List.iter (fun w ->
-    Printf.printf "Est-ce que \"%s\" est reconnu ? %b\n" w (check bloom w)
-  ) words;
+  (* Teste des animaux non ajoutés *)
+  let not_present = ["dragon"; "requin"; "poule"] in
+  Printf.printf "\n=== Tests des éléments absents ===\n";
+  List.iter (fun animal ->
+    let present = check bloom animal in
+    Printf.printf "\"%s\" dans le filtre? %b (devrait être faux)\n" animal present;
+    if present then 
+      Printf.printf "  ^ Faux positif! (acceptable avec 1%% de probabilité)\n"
+  ) not_present;
 
-  (* Tester des mots absents *)
-  let absent = ["dragon"; "requin"; "poule"] in
-  Printf.printf "\n--- Tests de faux positifs ---\n";
-  List.iter (fun w ->
-    Printf.printf "Est-ce que \"%s\" est reconnu ? %b\n" w (check bloom w)
-  ) absent
+  (* Affiche les statistiques *)
+  Printf.printf "\n=== Statistiques du filtre ===\n";
+  Printf.printf "Taille du filtre: %d bits\n" bloom.size;
+  Printf.printf "Nombre de fonctions de hachage: %d\n" bloom.k;
+  Printf.printf "Capacité estimée: 10,000 éléments\n";
+  Printf.printf "Taux de faux positifs théorique: 1%%\n"

@@ -18,6 +18,21 @@ let k n m =
   let m = float_of_int m in
   int_of_float (log 2.0 *. m /. n)
 
+(* Vérifie si le bit à la position [i] est activé (1) dans le filtre *)
+let get bloom i =
+  let index = i / 32 in
+  let offset = i mod 32 in
+  let mask = Int32.shift_left Int32.one offset in
+  Int32.logand bloom.bits.(index) mask <> Int32.zero
+
+(* Active le bit à la position [i] (le met à 1). *)
+let set bloom i =
+  let index = i / 32 in
+  let offset = i mod 32 in
+  let mask = Int32.shift_left Int32.one offset in
+  bloom.bits.(index) <- Int32.logor bloom.bits.(index) mask
+
+
 (* Fonction de test *)
 let () =
   let n = 10_000 in  (* nombre estimé de mots *)

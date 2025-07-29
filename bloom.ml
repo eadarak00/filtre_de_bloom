@@ -49,14 +49,8 @@ let create_bloom n p =
   }
 
 
-(* Fonction de test *)
 let () =
-  let n = 10_000 in  (* nombre estimé de mots *)
-  let p = 0.01 in    (* taux de faux positifs (1%) *)
-
-  let m_bits = m n p in
-  let k_hashes = k n m_bits in
-
-  Printf.printf "Pour n = %d mots et p = %.2f (faux positif) :\n" n p;
-  Printf.printf "- Taille du filtre (m) : %d bits\n" m_bits;
-  Printf.printf "- Nombre de hachages (k) : %d fonctions\n" k_hashes
+  let bloom = create_bloom 10000 0.01 in
+  set bloom 42;
+  Printf.printf "Bit 42 : %b\n" (get bloom 42);  (* devrait être true *)
+  Printf.printf "Bit 10 : %b\n" (get bloom 10)   (* devrait être false *)

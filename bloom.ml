@@ -48,9 +48,59 @@ let create_bloom n p =
     hash_seeds = generate_seeds k_hashes;
   }
 
+(* Fonction de hachage pour le filtre de Bloom *)
+let hash_i seed x size =
+  let base = Hashtbl.hash (seed, x) in
+  (abs base) mod size
 
+(* Ajoute un élément au filtre de Bloom *)
+let add bloom x =
+  for i = 0 to bloom.k - 1 do
+    let index = hash_i bloom.hash_seeds.(i) x bloom.size in
+    set bloom index
+  done
+
+(* Vérifie si un élément est probablement dans le filtre *)
+let check bloom x =
+  let rec loop i =
+    if i = bloom.k then true
+    else
+      let index = hash_i bloom.hash_seeds.(i) x bloom.size in
+      if get bloom index then loop (i + 1) else false
+  in
+  loop 0
+
+
+(* Programme de test principal *)
 let () =
+  (* Crée un filtre pour 10,000 éléments avec 1% de faux positifs *)
   let bloom = create_bloom 10000 0.01 in
-  set bloom 42;
-  Printf.printf "Bit 42 : %b\n" (get bloom 42);  (* devrait être true *)
-  Printf.printf "Bit 10 : %b\n" (get bloom 10)   (* devrait être false *)
+  
+  (* Ajoute quelques animaux *)
+  let animals = ["chat"; "chien"; "oiseau"; "tigre"; "lion"] in
+  List.iter (add bloom) animals;
+
+  (* Teste les animaux connus *)
+  Printf.printf "\n=== Tests des éléments ajoutés ===\n";
+  List.iter (fun animal ->
+    let present = check bloom animal in
+    Printf.printf "\"%s\" dans le filtre? %b (devrait être vrai)\n" animal present;
+    assert present (* Vérifie qu'ils sont tous reconnus *)
+  ) animals;
+
+  (* Teste des animaux non ajoutés *)
+  let not_present = ["dragon"; "requin"; "poule"] in
+  Printf.printf "\n=== Tests des éléments absents ===\n";
+  List.iter (fun animal ->
+    let present = check bloom animal in
+    Printf.printf "\"%s\" dans le filtre? %b (devrait être faux)\n" animal present;
+    if present then 
+      Printf.printf "  ^ Faux positif! (acceptable avec 1%% de probabilité)\n"
+  ) not_present;
+
+  (* Affiche les statistiques *)
+  Printf.printf "\n=== Statistiques du filtre ===\n";
+  Printf.printf "Taille du filtre: %d bits\n" bloom.size;
+  Printf.printf "Nombre de fonctions de hachage: %d\n" bloom.k;
+  Printf.printf "Capacité estimée: 10,000 éléments\n";
+  Printf.printf "Taux de faux positifs théorique: 1%%\n"

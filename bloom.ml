@@ -60,6 +60,16 @@ let add bloom x =
     set bloom index
   done
 
+(* Vérifie si un élément est probablement dans le filtre *)
+let check bloom x =
+  let rec loop i =
+    if i = bloom.k then true
+    else
+      let index = hash_i bloom.hash_seeds.(i) x bloom.size in
+      if get bloom index then loop (i + 1) else false
+  in
+  loop 0
+
 
 let () =
   let bloom = create_bloom 10000 0.01 in

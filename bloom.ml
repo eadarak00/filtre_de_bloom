@@ -94,6 +94,10 @@ let read_words filename =
   in
   aux []
 
+(* Ajoute tous les éléments d'une liste au filtre de Bloom *)
+let add_all bloom words =
+  List.iter (add bloom) words
+
 
 (* Programme de test principal *)
 let () =

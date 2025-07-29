@@ -53,6 +53,13 @@ let hash_i seed x size =
   let base = Hashtbl.hash (seed, x) in
   (abs base) mod size
 
+(* Ajoute un élément au filtre de Bloom *)
+let add bloom x =
+  for i = 0 to bloom.k - 1 do
+    let index = hash_i bloom.hash_seeds.(i) x bloom.size in
+    set bloom index
+  done
+
 
 let () =
   let bloom = create_bloom 10000 0.01 in

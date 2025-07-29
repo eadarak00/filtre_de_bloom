@@ -36,6 +36,19 @@ let set bloom i =
 let generate_seeds k =
   Array.init k (fun i -> 17 + i * 23)
 
+(* Crée un nouveau filtre de Bloom vide avec les paramètres optimaux. *)
+let create_bloom n p =
+  let m_bits = m n p in
+  let k_hashes = k n m_bits in
+  let int32_size = (m_bits + 31) / 32 in
+  {
+    bits = Array.make int32_size Int32.zero;
+    size = m_bits;
+    k = k_hashes;
+    hash_seeds = generate_seeds k_hashes;
+  }
+
+
 (* Fonction de test *)
 let () =
   let n = 10_000 in  (* nombre estimé de mots *)

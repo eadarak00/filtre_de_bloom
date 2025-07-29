@@ -1,3 +1,5 @@
+ (* === Sprint 1 – Base du filtre === *)
+
 (* Type pour représenter le filtre de Bloom *)
 type bloom = {
   bits: int32 array;        (* Tableau d'entiers 32 bits pour représenter les bits *)
@@ -48,6 +50,11 @@ let create_bloom n p =
     hash_seeds = generate_seeds k_hashes;
   }
 
+(* ===================== FIN SPRINT 1 ============================== *)
+
+
+(* === Sprint 2 – Ajout et vérification === *)
+
 (* Fonction de hachage pour le filtre de Bloom *)
 let hash_i seed x size =
   let base = Hashtbl.hash (seed, x) in
@@ -69,6 +76,23 @@ let check bloom x =
       if get bloom index then loop (i + 1) else false
   in
   loop 0
+
+(* ===================== FIN SPRINT 2 ============================== *)
+
+
+(* === Sprint 3 – Tests réels et comparaison === *)
+(* Lit un fichier et retourne la liste de ses lignes/mots *)
+let read_words filename =
+  let ic = open_in filename in
+  let rec aux acc =
+    try
+      let line = input_line ic in
+      aux (line :: acc)
+    with End_of_file ->
+      close_in ic;
+      List.rev acc
+  in
+  aux []
 
 
 (* Programme de test principal *)

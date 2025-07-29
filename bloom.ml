@@ -84,15 +84,15 @@ let check bloom x =
 (* Lit un fichier et retourne la liste de ses lignes/mots *)
 let read_words filename =
   let ic = open_in filename in
-  let rec aux acc =
-    try
-      let line = input_line ic in
-      aux (line :: acc)
-    with End_of_file ->
-      close_in ic;
-      List.rev acc
-  in
-  aux []
+  let acc = ref [] in
+  try
+    while true do
+      acc := input_line ic :: !acc
+    done;
+    assert false (* Unreachable *)
+  with End_of_file ->
+    close_in ic;
+    List.rev !acc
 
 (* Ajoute tous les éléments d'une liste au filtre de Bloom *)
 let add_all bloom words =
@@ -117,7 +117,7 @@ let measure f x =
   let result = f x in
   let stop = Sys.time () in
   (result, stop -. start)
-
+(* ===================== FIN SPRINT 3 ============================== *)
 
 
 (* Programme de test principal *)
@@ -152,4 +152,21 @@ let () =
   Printf.printf "Taille du filtre: %d bits\n" bloom.size;
   Printf.printf "Nombre de fonctions de hachage: %d\n" bloom.k;
   Printf.printf "Capacité estimée: 10,000 éléments\n";
-  Printf.printf "Taux de faux positifs théorique: 1%%\n"
+  Printf.printf "Taux de faux positifs théorique: 1%%\n";
+
+  (* test du dictionnaire *)
+  Printf.printf "\n=== Test avec le dictionnaire réel ===\n";
+  let words = read_words "./dictionary.txt" in
+  let bloom_dict = create_bloom (List.length words) 0.01 in
+  List.iter (add bloom_dict) words;
+
+  let array_words = Array.of_list words in
+  Array.sort compare array_words;
+
+  let test_cases = ["tiger"; "banana"; "fantôme"; "asdfgh"; "zebre"; "dragon"] in
+  List.iter (fun word ->
+    let (b_res, b_time) = measure (check bloom_dict) word in
+    let (s_res, s_time) = measure (fun w -> binary_search array_words w) word in
+    Printf.printf "Mot : %-10s | Bloom: %b (%.6fs) | Binaire: %b (%.6fs)\n"
+      word b_res b_time s_res s_time
+  ) test_cases

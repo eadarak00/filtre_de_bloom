@@ -119,54 +119,78 @@ let measure f x =
   (result, stop -. start)
 (* ===================== FIN SPRINT 3 ============================== *)
 
+let count_faux_positifs bloom dict real_words =
+  List.fold_left (fun acc word ->
+    if check bloom word && not (List.mem word dict) then acc + 1 else acc
+  ) 0 real_words
 
-(* Programme de test principal *)
+
+(* Programme principal regroupant tous les tests du projet *)
+
 let () =
-  (* Crée un filtre pour 10,000 éléments avec 1% de faux positifs *)
+  (* === PARTIE 1 : Test basique avec des animaux === *)
   let bloom = create_bloom 10000 0.01 in
-  
-  (* Ajoute quelques animaux *)
-  let animals = ["chat"; "chien"; "oiseau"; "tigre"; "lion"] in
-  List.iter (add bloom) animals;
+  let animaux = ["chat"; "chien"; "oiseau"; "tigre"; "lion"] in
+  List.iter (add bloom) animaux;
 
-  (* Teste les animaux connus *)
-  Printf.printf "\n=== Tests des éléments ajoutés ===\n";
-  List.iter (fun animal ->
-    let present = check bloom animal in
-    Printf.printf "\"%s\" dans le filtre? %b (devrait être vrai)\n" animal present;
-    assert present (* Vérifie qu'ils sont tous reconnus *)
-  ) animals;
+  Printf.printf "\n=== TEST 1 : Éléments ajoutés ===\n";
+  List.iter (fun a ->
+    let res = check bloom a in
+    Printf.printf "\"%s\" présent ? %b (attendu: true)\n" a res;
+    assert res
+  ) animaux;
 
-  (* Teste des animaux non ajoutés *)
-  let not_present = ["dragon"; "requin"; "poule"] in
-  Printf.printf "\n=== Tests des éléments absents ===\n";
-  List.iter (fun animal ->
-    let present = check bloom animal in
-    Printf.printf "\"%s\" dans le filtre? %b (devrait être faux)\n" animal present;
-    if present then 
-      Printf.printf "  ^ Faux positif! (acceptable avec 1%% de probabilité)\n"
-  ) not_present;
+  let absents = ["dragon"; "requin"; "poule"] in
+  Printf.printf "\n=== TEST 2 : Éléments absents ===\n";
+  List.iter (fun a ->
+    let res = check bloom a in
+    Printf.printf "\"%s\" présent ? %b (attendu: false)\n" a res;
+    if res then Printf.printf "  ↳ Faux positif !\n"
+  ) absents;
 
-  (* Affiche les statistiques *)
-  Printf.printf "\n=== Statistiques du filtre ===\n";
-  Printf.printf "Taille du filtre: %d bits\n" bloom.size;
-  Printf.printf "Nombre de fonctions de hachage: %d\n" bloom.k;
-  Printf.printf "Capacité estimée: 10,000 éléments\n";
-  Printf.printf "Taux de faux positifs théorique: 1%%\n";
+  Printf.printf "\n=== STATISTIQUES DU FILTRE ===\n";
+  Printf.printf "- Taille : %d bits\n" bloom.size;
+  Printf.printf "- Nombre de fonctions de hachage : %d\n" bloom.k;
+  Printf.printf "- Faux positifs théoriques : 1%%\n";
 
-  (* test du dictionnaire *)
-  Printf.printf "\n=== Test avec le dictionnaire réel ===\n";
+  (* === PARTIE 2 : Dictionnaire réel === *)
+  Printf.printf "\n=== TEST 3 : Dictionnaire réel ===\n";
   let words = read_words "./dictionary.txt" in
   let bloom_dict = create_bloom (List.length words) 0.01 in
-  List.iter (add bloom_dict) words;
+  add_all bloom_dict words;
 
+  (* Vérifie que le dictionnaire a bien été inséré dans le filtre *)
+  let mots_du_dictionnaire = ["the"; "student"; "house"; "information"; "system"] in
+  Printf.printf "\n=== TEST 3B : Validation du chargement du dictionnaire ===\n";
+  List.iter (fun mot ->
+    let res = check bloom_dict mot in
+    Printf.printf "Mot \"%s\" présent dans le filtre ? %b (attendu: true)\n" mot res;
+    if not res then Printf.printf "Attention : le mot devrait être présent !\n"
+  ) mots_du_dictionnaire;
+
+  (* Préparation pour la recherche binaire *)
   let array_words = Array.of_list words in
   Array.sort compare array_words;
 
-  let test_cases = ["tiger"; "banana"; "fantôme"; "asdfgh"; "zebre"; "dragon"] in
+  (* Test comparatif Bloom vs recherche binaire *)
+  let test_words = ["tiger"; "banana"; "fantôme"; "asdfgh"; "zebre"; "dragon"] in
+  Printf.printf "\n=== TEST 4 : Comparaison Bloom vs Binaire ===\n";
+  Printf.printf "| Mot        | Bloom | Temps Bloom | Binaire | Temps Binaire |\n";
+  Printf.printf "|------------|--------|--------------|---------|----------------|\n";
   List.iter (fun word ->
     let (b_res, b_time) = measure (check bloom_dict) word in
     let (s_res, s_time) = measure (fun w -> binary_search array_words w) word in
-    Printf.printf "Mot : %-10s | Bloom: %b (%.6fs) | Binaire: %b (%.6fs)\n"
+    Printf.printf "| %-10s | %-5b | %.6fs     | %-5b  | %.6fs      |\n"
       word b_res b_time s_res s_time
-  ) test_cases
+  ) test_words;
+
+  (* Faux positifs mesurés *)
+  let nb_tests = 500 in
+  let test_set = List.init nb_tests (fun i -> "mot_inexistant_" ^ string_of_int i) in
+  let faux_positifs = count_faux_positifs bloom_dict words test_set in
+  let taux = (float_of_int faux_positifs /. float_of_int nb_tests) *. 100.0 in
+
+  Printf.printf "\n=== TEST 5 : Faux positifs mesurés ===\n";
+  Printf.printf "- Nombre de mots testés : %d\n" nb_tests;
+  Printf.printf "- Faux positifs détectés : %d\n" faux_positifs;
+  Printf.printf "- Taux mesuré : %.2f%%\n" taux

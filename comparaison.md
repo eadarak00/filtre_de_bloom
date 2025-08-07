@@ -1,46 +1,62 @@
+
 # Comparaison : Filtre de Bloom vs Recherche Dichotomique
 
 ## Objectif
-Comparer les performances et la précision entre deux méthodes de recherche de mots :
-- **Filtre de Bloom** (probabiliste, rapide, mais possibilité de faux positifs)
-- **Recherche dichotomique** (précise mais plus lente pour certains cas)
+Comparer deux méthodes de recherche de mots :
+- **Filtre de Bloom** : rapide mais approximatif (peut donner de faux positifs)
+- **Recherche dichotomique** : plus lente mais toujours exacte
+
 
 ## Méthodologie
-1. Chargement de `dictionary.txt` (~99 912 mots)
-2. Insertion de tous les mots dans :
-   - un **filtre de Bloom**
-   - un **tableau trié** pour la recherche dichotomique
-3. Tests sur 6 mots mixtes (présents et absents)
-4. Mesure du **temps d’exécution** et de la **présence** détectée
-5. Génération d’un tableau de comparaison
 
-## Résultats des tests
-
-| Mot        | Bloom | Temps Bloom | Binaire | Temps Binaire |
-|------------|--------|--------------|---------|----------------|
-| tiger      | true   | 0.000010s     | true    | 0.000007s      |
-| banana     | true   | 0.000006s     | true    | 0.000007s      |
-| fantôme    | false  | 0.000002s     | false   | 0.000007s      |
-| asdfgh     | false  | 0.000003s     | false   | 0.000006s      |
-| zebre      | false  | 0.000002s     | false   | 0.000006s      |
-| dragon     | true   | 0.000006s     | true    | 0.000005s      |
+1. Chargement du dictionnaire (`dictionary.txt`, ~99 912 mots)
+2. Construction :
+   - d’un **filtre de Bloom** (1% de faux positifs)
+   - d’un **tableau trié** pour la recherche binaire
+3. Test de 6 mots (présents & absents)
+4. Mesure :
+   - de la **détection de présence**
+   - du **temps d’exécution** pour chaque méthode
 
 
-## Analyse
+##  Résultats expérimentaux
 
--  **Filtre de Bloom** : Très rapide (temps < 10 µs), mais 1 faux positif (`dragon`)
--  **Recherche binaire** : Très fiable, mais légèrement plus lente
--  Le **taux de faux positifs mesuré** sur 500 mots aléatoires inexistants :  
-  - Faux positifs : 2  
-  - **Taux réel ≈ 0.40%**
+| Mot       | Bloom  | Temps Bloom    | Dichotomique  | Temps Dichotomique   |
+|-----------|--------|----------------|---------------|----------------------|
+| tiger     | true   | 0.000006s      | true          | 0.000007s            |
+| banana    | true   | 0.000004s      | true          | 0.000005s            |
+| fantôme   | false  | 0.000002s      | false         | 0.000005s            |
+| asdfgh    | false  | 0.000002s      | false         | 0.000005s            |
+| zebre     | false  | 0.000002s      | false         | 0.000005s            |
+| dragon    | true   | 0.000004s      | true          | 0.000003s            |
+
+- **Remarque** : `dragon` est un **faux positif** du filtre de Bloom (le mot n’est pas dans le dictionnaire).
+
+
+## Faux positifs mesurés
+
+- Nombre de mots aléatoires testés : **500**
+- Faux positifs détectés : **~2**
+- **Taux réel mesuré ≈ 0.40%**
+
+
+## Analyse comparative
+
+| Critère                  | Filtre de Bloom                 | Recherche Dichotomique       |
+|--------------------------|---------------------------------|------------------------------|
+| **Temps de recherche**   |  Ultra rapide                   |  Un peu plus lent            |
+| **Exactitude**           |  Faux positifs possibles        |  Toujours exact              |
+| **Faux négatifs**        |  Aucun                          |  Aucun                       |
+| **Espace mémoire**       |  Compact (utilise des bits)     |  Tableau complet en mémoire  |
+| **Utilisation idéale**   | Vérification rapide de présence |  Recherches fiables et sûres |
 
 
 ## Conclusion
 
-| Critère                | Filtre de Bloom               | Recherche Dichotomique  |
-|------------------------|-------------------------------|-------------------------|
-| Temps de recherche     | Très rapide                   |  Plus lent              |
-| Exactitude             | Faux positifs possibles       |  100% fiable            |
-| Espace mémoire         | Optimisé (bits)               |  Tableau complet        |
-| Idéal pour             | Présence approximative rapide |  Recherche exacte       |
+Le **filtre de Bloom** est idéal pour des cas où :
+- La **rapidité** prime sur la précision absolue
+- Un **faux positif** est tolérable (ex : cache, dédoublonnage)
 
+La **recherche dichotomique** reste le choix :
+- Pour des **résultats toujours exacts**
+- Quand les **faux positifs sont critiques**

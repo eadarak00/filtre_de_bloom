@@ -126,7 +126,6 @@ let count_faux_positifs bloom dict real_words =
 
 
 (* Programme principal regroupant tous les tests du projet *)
-
 let () =
   (* === PARTIE 1 : Test basique avec des animaux === *)
   let bloom = create_bloom 10000 0.01 in
@@ -168,19 +167,19 @@ let () =
     if not res then Printf.printf "Attention : le mot devrait être présent !\n"
   ) mots_du_dictionnaire;
 
-  (* Préparation pour la recherche binaire *)
+  (* Préparation pour la recherche dichotomique *)
   let array_words = Array.of_list words in
   Array.sort compare array_words;
 
-  (* Test comparatif Bloom vs recherche binaire *)
+  (* Test comparatif Bloom vs recherche dichotomique *)
   let test_words = ["tiger"; "banana"; "fantôme"; "asdfgh"; "zebre"; "dragon"] in
-  Printf.printf "\n=== TEST 4 : Comparaison Bloom vs Binaire ===\n";
-  Printf.printf "| Mot        | Bloom | Temps Bloom | Binaire | Temps Binaire |\n";
-  Printf.printf "|------------|--------|--------------|---------|----------------|\n";
+  Printf.printf "\n=== TEST 4 : Comparaison Bloom vs Dichotomique ===\n";
+  Printf.printf "| Mot        | Bloom | Temps Bloom | Dichotomique | Temps Dichotomique |\n";
+  Printf.printf "|------------|--------|--------------|--------------|--------------------|\n";
   List.iter (fun word ->
     let (b_res, b_time) = measure (check bloom_dict) word in
     let (s_res, s_time) = measure (fun w -> binary_search array_words w) word in
-    Printf.printf "| %-10s | %-5b | %.6fs     | %-5b  | %.6fs      |\n"
+    Printf.printf "| %-10s | %-5b | %.6fs     | %-5b        | %.6fs          |\n"
       word b_res b_time s_res s_time
   ) test_words;
 

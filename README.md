@@ -33,12 +33,12 @@ Ce projet implémente un **filtre de Bloom** en OCaml — une structure de donn�
 "chat" présent ? true (attendu: true)
 ...
 
-\=== TEST 4 : Comparaison Bloom vs Binaire ===
+\=== TEST 4 : Comparaison Bloom vs Dichotomique ===
 
-| Mot   | Bloom | Temps Bloom | Binaire | Temps Binaire |
-| ----- | ----- | ----------- | ------- | ------------- |
-| tiger | true  | 0.000010s   | true    | 0.000007s     |
-| ...   |       |             |         |               |
+| Mot   | Bloom | Temps Bloom | Dichotomique | Temps Dichotomique |
+| ----- | ----- | ----------- | ------------ | ------------------ |
+| tiger | true  | 0.000006s   | true         | 0.000007s          |
+| ...   |       |             |              |                    |
 
 \=== TEST 5 : Faux positifs mesurés ===
 
@@ -59,7 +59,8 @@ ocamlopt -o bloom bloom.ml
 
 * Projet réalisé dans le cadre du module d’algorithmique avancée
 * Encadrant : *\[Mouhamadou GAYE]*
-* Étudiant : *\[El Hadji Abdou DRAME]*
+* Étudiant 1 : *\[El Hadji Abdou DRAME]*
+* Étudiant 2 : *\[Djiby FALL]*
 
 
 ## Références
